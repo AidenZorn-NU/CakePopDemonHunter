@@ -22,11 +22,14 @@ while True:
     # Our operations on the frame come here
     gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
 
-    # calculate change in gray
     if first:
         prev_gray = gray
         first = False
-    delta = cv.absdiff(gray, prev_gray).sum()
+
+    # calculate change in gray
+    delta = cv.absdiff(gray[0:100], prev_gray[0:100]).sum()
+
+    cv.rectangle(frame, (0,0),(100,100), (100,100,100),2)
 
     # Display Text
     cv.putText(frame, str(delta), (50,300), cv.FONT_HERSHEY_SIMPLEX, 2, (255,255,255), 4)
