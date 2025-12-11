@@ -24,6 +24,9 @@ hunter_color = (0,255,255)
 demon_color = (50,50,250)
 demon_attack_corner_countdown = 300
 demon_hunted = False
+x_in_range = False
+y_in_range = False
+demon_top_position = [270,-100,370,0]
 
 while True:
     # Capture frame-by-frame
@@ -39,9 +42,6 @@ while True:
     if first:
         prev_gray = gray
         first = False
-
-    # Display score
-    cv.putText(frame, 'Score: '+str(score), (150,50), cv.FONT_HERSHEY_SIMPLEX, 2, hunter_color, 4)
     
     if not lose:
         ## determine demon activity
@@ -56,7 +56,7 @@ while True:
             demon_attack_corner = True
             if score<10:
                 demon_attack_corner_countdown = 300
-            if score<20:
+            elif score<20:
                 demon_attack_corner_countdown = 200
             else:
                 demon_attack_corner_countdown = 150
@@ -67,14 +67,27 @@ while True:
         
         if prepare_demon_arrive_top:
             prepare_demon_arrive_top = False
-            demon_arrive_top_timer = random.randint(1200,3600)
+            demon_arrive_top_timer = random.randint(300,900)
         
         if demon_arrive_top_timer==0:
             demon_attack_top = True
-            demon_top_position = [-100,0,270,370]
+            demon_x_pos = random.randint(200,400)
+            demon_top_position = [demon_x_pos-50,-100,demon_x_pos+50,0]
+        
+        if score<20:
+            speed = 2
+        elif score<40:
+            speed = 4
+        else:
+            speed = 6
         
         if demon_attack_top:
-            demon_top_position = demon_top_position + [10,10,0,0]
+            demon_top_position[1]+=speed
+            demon_top_position[3]+=speed
+            if demon_top_position[1]>480:
+                prepare_demon_arrive_top = True
+                demon_attack_top = False
+                score+=5
 
         # demon countdowns/timers
         demon_arrive_corner_timer-=1
@@ -145,6 +158,10 @@ while True:
                 cv.putText(frame, str(demon_attack_corner_countdown), (540,370), cv.FONT_HERSHEY_SIMPLEX, 1, demon_color, 2)
                 if defeat_4:
                     demon_hunted = True
+        
+        # cv.putText(frame, str(demon_arrive_top_timer), (150,450), cv.FONT_HERSHEY_SIMPLEX, 2, demon_color, 4)
+        if demon_attack_top:
+            cv.rectangle(frame, (demon_top_position[0],demon_top_position[1]),(demon_top_position[2],demon_top_position[3]), demon_color, -1)
 
         if demon_hunted:
             demon_hunted = False
@@ -158,15 +175,34 @@ while True:
         for (x,y,w,h) in faces:
             cv.rectangle(frame, (x,y), (x+w,y+h), hunter_color, 2)
 
+            # hit detection
+            if x<demon_top_position[0]<x+w or x<demon_top_position[2]<x+w:
+                x_in_range = True
+            else:
+                x_in_range = False
+            
+            if y<demon_top_position[1]<y+h or y<demon_top_position[3]<y+h:
+                y_in_range = True
+            else:
+                y_in_range = False
+
+        if x_in_range and y_in_range:
+            lose = True
         # Display the resulting frame
         #cv.imshow('frame', gray)
+
+        # Display score
+        cv.putText(frame, 'Score: '+str(score), (150,50), cv.FONT_HERSHEY_SIMPLEX, 2, hunter_color, 4)
 
         # save previous frame
         cv.imshow('frame',frame)
         prev_gray = gray
 
     else:
-        cv.putText(frame, 'YOU LOSE', (10,300), cv.FONT_HERSHEY_SIMPLEX, 4, demon_color, 10)
+        cv.putText(frame, 'GAME OVER', (10,300), cv.FONT_HERSHEY_SIMPLEX, 3, demon_color, 10)
+
+        # Display score
+        cv.putText(frame, 'Score: '+str(score), (150,50), cv.FONT_HERSHEY_SIMPLEX, 2, hunter_color, 4)
 
         # save previous frame
         cv.imshow('frame',frame)
