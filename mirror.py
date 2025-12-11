@@ -9,7 +9,7 @@ if not cap.isOpened():
     print("Cannot open camera")
     exit()
 
-# face_cascade = cv.CascadeClassifier('haarcascade_frontalface_default.xml')
+face_cascade = cv.CascadeClassifier('haarcascade_frontalface_default.xml')
 
 first = True
 score = 0
@@ -28,6 +28,8 @@ while True:
     if first:
         prev_gray = gray
         first = False
+
+    
 
     # calculate change in gray
     delta_1 = cv.absdiff(gray[0:100,0:100], prev_gray[0:100,0:100]).sum()
@@ -67,10 +69,10 @@ while True:
     cv.rectangle(frame, (540,380),(640,480), color_4,2)
 
     # face detection
-    # faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
+    faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
 
-    # for (x,y,w,h) in faces:
-    #     cv.rectangle(frame, (x,y), (x+w,y+h), (0,255,255), 2)
+    for (x,y,w,h) in faces:
+        cv.rectangle(frame, (x,y), (x+w,y+h), (0,255,255), 2)
 
     # Display the resulting frame
     #cv.imshow('frame', gray)
