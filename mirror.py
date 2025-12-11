@@ -10,6 +10,7 @@ if not cap.isOpened():
     exit()
 
 first = True
+score = 0
 
 while True:
     # Capture frame-by-frame
